@@ -17,7 +17,6 @@
 var impunit = (function () {
 
     function createInstance() {
-
         var impunit = {}, messages = "", isTestFailed, testsRun = -1, testsFailed = -1, silent = true, testName;
 
         // privat function to report an error
@@ -80,7 +79,7 @@ var impunit = (function () {
             }
             return silent;
         };
-
+        
         return impunit;
     }
 

@@ -26,7 +26,7 @@ var runTests = function () {
         return iuClone;
     }
 
-    function ReportResult() {
+    function reportResult() {
         var result = "<h1>Testing done!</h1>"
                 + "<p>Tests run: " + impunit.testsRun() + "<br>"
                 + "Tests failed: " + impunit.testsFailed() + "</p>"
@@ -298,6 +298,6 @@ var runTests = function () {
     if (impunit.testsRun() <= 0) {
         alert("ERR: No tests were run!");
     } else {
-        ReportResult();
+        reportResult();
     }
 };
