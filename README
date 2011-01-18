@@ -6,61 +6,56 @@ A very light-weight unit-testing framework written in Javascript.
 * very small (under 70 lines of code, compressed size around 1kB) and very easy
 * supports multiple test suites
 * provides assertTrue and assertEquals methods
-* if given a suite object, the object is scanned for test-methods and executed
-* if not given an a suite object, the global namespace is parsed for test-methods
+* a test-suite object is scanned for test-methods and executed
 * tests are run automatically in an sequential synchronous order
 * several instances of impunit can live peacefully together in one project
 
 future improvements:
 
-* IE support for global namespace
 * support for asynchronous tests
+* passing and executing an arbitrary number of test suites with one "runTests" call
 * support for assertError (check if a certain condition leads to an error as expected)
+
 
 
 Defining Tests
 --------------
 
 This repository contains the ImpUnit framework along with a test suite that tests 
-it. You can look at the test suite (check tests.js) to get an immediate feeling for how it is done. 
-If you want to take the long road, you can check out the step-by-step description 
-below.
+it. You can look at the test suite (check tests.js) to get an immediate feeling for how
+it is done. If you want to take the long road, you can check out the step-by-step
+description below.
 
 First include the impunit.js file into your html document:
 
 	<script type="text/javascript" src="js/impunit.js"></script>
 
-Now you can either define some global test functions or create an separate test
-suite. Always start your test methods with the word "_test", which is the string 
+Create a test suite object. Always start your test methods with the word "_test", which is the string
 token ImpUnit uses to identify them:
 
-	_testSomeGlobalTestMethod () {
-		assertTrue( (1+1) == 2, "I did the math");
-	}
-	
-You may also create a test suite object:
-
 	var testsuite = {
-		_testSuiteMethod () {
+
+		_testMath : function () {
 			assertTrue( (1+1) == 2, "I did the math");
-		}
+		},
+
+		_testLolz : function () {
+			assertEqual( "lol, "rofl", "No, that is not the same");
+		},
 	};
 
 Note: Test suites do not litter the global namespace and give you the possibility 
-to group tests together. They are the recommended option. You may use the global 
-option for some quick and dirty testing if you like.
+to group tests together.
 
 Running Tests
 -------------
 
-You can run the tests by calling the runTests method. You can pass a test-suite 
-object to the function as parameter, which will then be inspected by ImpUnit and 
-all methods starting with "_test" will be executed. If you do not pass an object 
-the global namespace will be searched for test methods.
+You can run the tests by calling the runTests method. Pass your test-suite
+object to the function as parameter, which will then be inspected by ImpUnit and
+all methods starting with "_test" will be executed.
 
 	impunit.runTests(testSuite);
-	impunit.runTests(); // global
-	
+
 Tests fail if ...
 
 * an assert condition fails	
@@ -69,7 +64,7 @@ Tests fail if ...
 Interpreting The Results
 ------------------------
 
-After calling runTests() you can receive the info about the last run from 
+After calling "runTests" you can receive the info about the last run from
 impunit and show it. You can check the "reportError" method in the tests.js
 contained in the repository. Below you find another simpler implementation:
 

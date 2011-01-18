@@ -31,7 +31,7 @@ var impunit = (function () {
         // run the tests in a test container
         impunit.runTests = function (testSuite) {
             if (!testSuite) {
-                testSuite = window;
+                reportError("ERROR: No Test Suite specified.");
             }
 
             testsRun = 0;
@@ -72,14 +72,14 @@ var impunit = (function () {
         impunit.messages = function () { return messages; };
         impunit.testsFailed = function () { return testsFailed; };
         impunit.testsRun = function () { return testsRun; };
-
+        
         impunit.silent = function (value) {
             if (arguments.length > 0) {
                 silent = (value) ? true : false;
             }
             return silent;
         };
-        
+
         return impunit;
     }
 

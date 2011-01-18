@@ -14,10 +14,6 @@
    limitations under the License.
 */
 
-_testGlobalTest = function () {
-    impunit.assertTrue(true);
-}
-
 var runTests = function () {
 
     function getImpUnitTestInstance() {
@@ -284,12 +280,6 @@ var runTests = function () {
             var msgLen2 = testImpUnit.messages().length;
 
             impunit.assertTrue(msgLen1 < msgLen2);
-        },
-
-        _testGlobalNamespace : function () {
-            var testImpUnit = getImpUnitTestInstance();
-            testImpUnit.runTests();
-            impunit.assertEqual(1, testImpUnit.testsRun());
         }
     };
 
