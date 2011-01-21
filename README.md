@@ -12,6 +12,7 @@ A very light-weight unit-testing framework written in Javascript.
 * support for asynchronous tests
  
 future improvements:
+
 * improve code to use only single quotes
 * provide number of asynchronous tests
 * passing and executing an arbitrary number of test suites with one "runTests" call
