@@ -9,15 +9,14 @@ A very light-weight unit-testing framework written in Javascript.
 * a test-suite object is scanned for test-methods and executed
 * tests are run automatically in an sequential synchronous order
 * several instances of impunit can live peacefully together in one project
-
-future improvements:
-
 * support for asynchronous tests
+ 
+future improvements:
+* improve code to use only single quotes
+* provide number of asynchronous tests
 * passing and executing an arbitrary number of test suites with one "runTests" call
 * support for assertError (check if a certain condition leads to an error as expected)
-
-
-
+                                              
 Defining Tests
 --------------
 
@@ -47,6 +46,29 @@ token ImpUnit uses to identify them:
 Note: Test suites do not litter the global namespace and give you the possibility 
 to group tests together.
 
+Asynchronous Tests
+------------------
+
+Since you never know when an asynchronous test is finished, they are handled aside 
+from synchronous tests. To work with asynchronous tests you can use callbacks 
+that you can define in your test and pass on to ImpUnit. They will be altered in
+a way that ImpUnit is later able to identify where to which test the callback belongs.
+
+Here is sample definition of an asynchronous test :
+
+	var testsuite = {
+	
+        _testAsync : function () {
+			var asynchCallback = impunit.asyncCallback(function () {
+				impunit.assertTrue(false, "The async test failed");
+			});
+			setTimeout(asynchCallback, 200);
+        }	
+	};     
+	
+Note: You can always check the file tests.js for more examples of asynchronous
+tests. 	
+
 Running Tests
 -------------
 
@@ -73,6 +95,21 @@ contained in the repository. Below you find another simpler implementation:
                 + "Tests run: " + impunit.testsRun() + "\n"
                 + "Tests failed: " + impunit.testsFailed() + "\n"
                 + "errors:\n" + impunit.messages() + "\n");
+
+Interpreting Asynchronous Results
+---------------------------------
+
+Calling "runTests" will also start all asynchronous tests within a test suite.
+You can specify a callback that will inform your code if an asynchronous test 
+was run. You can then check if there are error messages for asynchronous tests
+in the framework:    
+	
+	function onAsyncCallbackFinished() {
+		alert("Asynchronous Tests failed: "	+ impunit.asyncTestsFailed() + "</p>"
+				+ "<pre>"" + impunit.asyncMessages() + "</pre>";
+	}  
+	impunit.onAsyncTestFailed(onAsyncCallback);
+	
 
 API Methods
 -----------
