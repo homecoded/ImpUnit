@@ -17,12 +17,23 @@
 var impunit = (function () {
 
     function createInstance() {
-        var impunit = {}, messages = "", isTestFailed, testsRun = -1, testsFailed = -1, silent = true, testName;
+        var impunit = {}, messages = "", asyncMessages = "", isTestFailed, 
+			testsRun = -1, testsFailed = -1, asyncTestsFailed = -1, 
+			silent = true, testName, asyncTestName = null, 
+			asyncTests = [], asyncCb = null;
 
-        // privat function to report an error
-        function reportError(msg) {
+        // private function to report an error
+        function reportError(msg, asyncTestName) {
             isTestFailed = true;
-            messages += msg + "\n\n";
+            if (asyncTestName) {
+				asyncMessages += "ASYNC TEST (" + asyncTestName + "):\n" + msg + "\n\n";
+				asyncTestsFailed += 1; 
+				if (asyncCb) {
+					asyncCb();
+				}
+			} else {
+				messages += msg + "\n\n";
+			}
             if (!silent) {
                 alert(msg);
             }
@@ -34,12 +45,17 @@ var impunit = (function () {
                 reportError("ERROR: No Test Suite specified.");
             }
 
+			var test;
             testsRun = 0;
             testsFailed = 0;
+            asyncTestsFailed = 0;
             messages = "";
+            asyncTests = [];
+			asyncTestName = "";
 
-            for (testName in testSuite) {
-                if (testSuite.hasOwnProperty(testName)) {
+            for (test in testSuite) {
+                if (testSuite.hasOwnProperty(test)) {
+					testName = test;
                     try {
                         if (typeof (testSuite[testName]) === "function" && testName.indexOf("_test") === 0) {
                             isTestFailed = false;
@@ -57,20 +73,28 @@ var impunit = (function () {
             }
         };
 
-        impunit.assertTrue = function (boolExpr, msg)	{
-            if (boolExpr === false) {
-                reportError("TEST FAILED\nTest Name: " + testName + "\nassertTrue: " + msg);
+		function assert(expr, testIdent, msg, asyncTestName) {
+			if (expr === false) {
+                reportError("TEST FAILED\nTest Name: " + testName + "\n" + testIdent + ": " + msg, 
+					asyncTestName);
             }
+            if (asyncTestName && asyncCb) {
+				asyncCb();
+			}
+		}
+
+        impunit.assertTrue = function (boolExpr, msg) {
+            assert(boolExpr, "assertTrue", msg, impunit.assertTrue.caller.name);
         };
 
         impunit.assertEqual = function (exp1, exp2, msg) {
-            if (exp1 !== exp2) {
-                reportError("TEST FAILED\nTest Name: " + testName + "\n\nassertEqual <" + exp1 + "> != <" + exp2 + ">\n" + msg);
-            }
+			assert(exp1 === exp2, "assertEqual <" + exp1 + "> != <" + exp2 + ">", msg, impunit.assertEqual.caller.name);
         };
 
         impunit.messages = function () { return messages; };
+        impunit.asyncMessages = function () { return asyncMessages; };
         impunit.testsFailed = function () { return testsFailed; };
+        impunit.asyncTestsFailed = function () { return asyncTestsFailed; };
         impunit.testsRun = function () { return testsRun; };
         
         impunit.silent = function (value) {
@@ -79,6 +103,18 @@ var impunit = (function () {
             }
             return silent;
         };
+        
+        impunit.onAsyncTestFailed = function (callback) {
+			if (arguments.length > 0 && typeof callback === 'function') {
+                asyncCb = callback;
+            }
+            return asyncCb;
+		};
+
+		impunit.asyncCallback = function (callback) {
+			callback.testName = testName;
+			return callback;			
+		};
 
         return impunit;
     }

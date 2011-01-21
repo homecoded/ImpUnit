@@ -13,6 +13,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+/*global impunit */
+
+var globalAsyncImpunit;
 
 var runTests = function () {
 
@@ -32,10 +35,20 @@ var runTests = function () {
         results.innerHTML = result;
         results.style.color = (impunit.testsFailed() > 0) ? "#880000" : "#008800";
     }
+    
+	function onAsyncCallbackFinished() {
+		var results = document.getElementById('asyncResults');	
+		var result = "Asynchronous Tests failed: " + impunit.asyncTestsFailed() + "</p>"
+				+ '<pre>' + impunit.asyncMessages() + '</pre>';
+		
+		results.style.color = (impunit.asyncTestsFailed() > 0) ? "#880000" : "#008800";
+		results.innerHTML = result;	
+	}    
 
     //  test suite
     var testSuite = {
-        _testInit : function _testInit(){
+
+        _testInit : function _testInit() {
             var testImpUnit = getImpUnitTestInstance();
             impunit.assertTrue(testImpUnit.testsRun() <= 0);
             impunit.assertTrue(testImpUnit.testsFailed() <= 0);
@@ -45,7 +58,7 @@ var runTests = function () {
             var testImpUnit2 = getImpUnitTestInstance();
             testImpUnit2.silent(true);
             testImpUnit.silent(false);
-            impunit.assertTrue(testImpUnit.silent() !== testImpUnit2.silent(), "silent is different" );
+            impunit.assertTrue(testImpUnit.silent() !== testImpUnit2.silent(), "silent is different");
 
             testImpUnit2.assertTrue(false);
             impunit.assertTrue(testImpUnit2.messages().length > 0, "testImpUnit2 has messages");
@@ -81,7 +94,7 @@ var runTests = function () {
             testImpUnit.assertEqual("", "");
             testImpUnit.assertEqual(null, null);
             testImpUnit.assertEqual(undefined, undefined);
-            var a,b;
+            var a, b;
             testImpUnit.assertEqual(a, b);
             testImpUnit.assertEqual(a, undefined);
             a = b = {};
@@ -280,11 +293,39 @@ var runTests = function () {
             var msgLen2 = testImpUnit.messages().length;
 
             impunit.assertTrue(msgLen1 < msgLen2);
-        }
+        },
+
+        _testAsync : function () {
+			var asynchCallback = impunit.asyncCallback(function () {
+				impunit.assertTrue(true, "The async test was false");
+			});
+			setTimeout(asynchCallback, 200);
+        },
+        
+        _testAsyncFail : function () {
+			var globalAsyncImpunit = getImpUnitTestInstance();
+			var testSuite = {
+				_test : function () {
+					var cb = globalAsyncImpunit.asyncCallback(function () {
+						globalAsyncImpunit.assertTrue(false);
+					});
+					setTimeout(cb, 100);
+				}
+			};
+			globalAsyncImpunit.runTests(testSuite);
+			var impcb = impunit.asyncCallback(function () {
+				impunit.assertEqual(1, globalAsyncImpunit.asyncTestsFailed());
+				impunit.assertTrue(globalAsyncImpunit.asyncMessages().length > 0);
+				globalAsyncImpunit = null;
+			}); 
+			setTimeout(impcb, 200);
+		}                                   
     };
 
     // run the tests
-    impunit.runTests(testSuite);
+    impunit.onAsyncTestFailed(onAsyncCallbackFinished);
+	impunit.runTests(testSuite);
+    
     if (impunit.testsRun() <= 0) {
         alert("ERR: No tests were run!");
     } else {
