@@ -93,7 +93,7 @@ var impunit = (function () {
         };
 
         impunit.assertEqual = function (exp1, exp2, msg) {
-            assert(exp1 === exp2, 'assertEqual <' + exp1 + '> != <' + exp2 + '>', msg, impunit.assertEqual.caller.testName);
+            assert(exp1 === exp2, 'assertEqual (' + exp1 + ') != (' + exp2 + ')', msg, impunit.assertEqual.caller.testName);
         };
 
         impunit.messages = function () { return messages; };
