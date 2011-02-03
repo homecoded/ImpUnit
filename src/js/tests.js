@@ -26,22 +26,23 @@ var runTests = function () {
     }
 
     function reportResult() {
-        var result = "<h1>Testing done!</h1>"
-                + "<p>Tests run: " + impunit.testsRun() + "<br>"
-                + "Tests failed: " + impunit.testsFailed() + "</p>"
-                + "<p><pre>" + impunit.messages() + "</pre></p>";
+        var result = '<h1>Testing done!</h1>'
+                + '<p>Tests run: ' + impunit.testsRun() + '<br>'
+                + 'Tests failed: ' + impunit.testsFailed() + '</p>'
+                + '<p><pre>' + impunit.messages() + '</pre></p>';
 
         var results = document.getElementById('results');
         results.innerHTML = result;
-        results.style.color = (impunit.testsFailed() > 0) ? "#880000" : "#008800";
+        results.style.color = (impunit.testsFailed() > 0) ? '#880000' : '#008800';
     }
     
 	function onAsyncCallbackFinished() {
 		var results = document.getElementById('asyncResults');	
-		var result = "Asynchronous Tests failed: " + impunit.asyncTestsFailed() + "</p>"
+		var result = 'Asynchronous Tests run: ' + impunit.asyncTestsRun() + '<br>'
+                + 'Asynchronous Tests failed: ' + impunit.asyncTestsFailed() + '</p>'
 				+ '<pre>' + impunit.asyncMessages() + '</pre>';
 		
-		results.style.color = (impunit.asyncTestsFailed() > 0) ? "#880000" : "#008800";
+		results.style.color = (impunit.asyncTestsFailed() > 0) ? '#880000' : '#008800';
 		results.innerHTML = result;	
 	}    
 
@@ -58,23 +59,23 @@ var runTests = function () {
             var testImpUnit2 = getImpUnitTestInstance();
             testImpUnit2.silent(true);
             testImpUnit.silent(false);
-            impunit.assertTrue(testImpUnit.silent() !== testImpUnit2.silent(), "silent is different");
+            impunit.assertTrue(testImpUnit.silent() !== testImpUnit2.silent(), 'silent is different');
 
             testImpUnit2.assertTrue(false);
-            impunit.assertTrue(testImpUnit2.messages().length > 0, "testImpUnit2 has messages");
-            impunit.assertTrue(testImpUnit.messages().length === 0, "testImpUnit has no messages");
+            impunit.assertTrue(testImpUnit2.messages().length > 0, 'testImpUnit2 has messages');
+            impunit.assertTrue(testImpUnit.messages().length === 0, 'testImpUnit has no messages');
         },
 
         _testNoFailNoMessage : function () {
             var testImpUnit = getImpUnitTestInstance();
-            testImpUnit.assertTrue(true, "test");
-            impunit.assertEqual("", testImpUnit.messages(), "test");
+            testImpUnit.assertTrue(true, 'test');
+            impunit.assertEqual('', testImpUnit.messages(), 'test');
         },
 
         _testFailHasMessage : function () {
             var testImpUnit = getImpUnitTestInstance();
-            testImpUnit.assertTrue(false, "test2");
-            impunit.assertTrue(testImpUnit.messages().length > 0, "test");
+            testImpUnit.assertTrue(false, 'test2');
+            impunit.assertTrue(testImpUnit.messages().length > 0, 'test');
         },
 
         _testAssertTrue : function () {
@@ -91,7 +92,7 @@ var runTests = function () {
             testImpUnit.assertEqual(12, 12);
             testImpUnit.assertEqual(-12, -12);
             testImpUnit.assertEqual(12, 12);
-            testImpUnit.assertEqual("", "");
+            testImpUnit.assertEqual('', '');
             testImpUnit.assertEqual(null, null);
             testImpUnit.assertEqual(undefined, undefined);
             var a, b;
@@ -106,7 +107,7 @@ var runTests = function () {
 
         _testAssertEqualFailCase1 : function () {
             var testImpUnit = getImpUnitTestInstance();
-            testImpUnit.assertEqual("0", 0);
+            testImpUnit.assertEqual('0', 0);
             impunit.assertTrue(testImpUnit.messages().length !== 0);
         },
 
@@ -118,7 +119,7 @@ var runTests = function () {
 
         _testAssertEqualFailCase3 : function () {
             var testImpUnit = getImpUnitTestInstance();
-            testImpUnit.assertEqual("0", "1");
+            testImpUnit.assertEqual('0', '1');
             impunit.assertTrue(testImpUnit.messages().length !== 0);
         },
 
@@ -136,7 +137,7 @@ var runTests = function () {
 
         _testAssertEqualFailCase6 : function () {
             var testImpUnit = getImpUnitTestInstance();
-            testImpUnit.assertEqual("null", null);
+            testImpUnit.assertEqual('null', null);
             impunit.assertTrue(testImpUnit.messages().length !== 0);
         },
 
@@ -259,7 +260,7 @@ var runTests = function () {
             var testImpUnit = getImpUnitTestInstance();
             var testSuiteError = {
                 _test1 : function () {
-                    throw "Some custom error";
+                    throw 'Some custom error';
                 },
                 _test2 : function () {
                     var s;
@@ -297,7 +298,7 @@ var runTests = function () {
 
         _testAsync : function () {
 			var asynchCallback = impunit.asyncCallback(function () {
-				impunit.assertTrue(true, "The async test was false");
+				impunit.assertTrue(true, 'The async test was false');
 			});
 			setTimeout(asynchCallback, 200);
         },
@@ -308,6 +309,7 @@ var runTests = function () {
 				_test : function () {
 					var cb = globalAsyncImpunit.asyncCallback(function () {
 						globalAsyncImpunit.assertTrue(false);
+                        globalAsyncImpunit.assertTrue(false);
 					});
 					setTimeout(cb, 100);
 				}
@@ -327,7 +329,7 @@ var runTests = function () {
 	impunit.runTests(testSuite);
     
     if (impunit.testsRun() <= 0) {
-        alert("ERR: No tests were run!");
+        alert('ERR: No tests were run!');
     } else {
         reportResult();
     }
