@@ -42,9 +42,13 @@ var impunit = (function () {
         }
 
         // run the tests in a test container
-        impunit.runTests = function (testSuite) {
-            if (!testSuite) {
+        impunit.runTests = function (testSuites) {
+            if (!testSuites) {
                 reportError('ERROR: No Test Suite specified.');
+            }
+
+            if (!(testSuites instanceof Array)) {
+                testSuites = [testSuites];
             }
 
             var test;
@@ -55,21 +59,25 @@ var impunit = (function () {
             asyncTestsRun = [];
             messages = '';
 
-            for (test in testSuite) {
-                if (testSuite.hasOwnProperty(test)) {
-                    testName = test;
-                    try {
-                        if (typeof (testSuite[testName]) === 'function' && testName.indexOf('_test') === 0) {
-                            isTestFailed = false;
-                            testsRun += 1;
-                            testSuite[testName]();
-                            if (isTestFailed) {
-                                testsFailed += 1;
+            var numTestSuites = testSuites.length;
+            for (i = 0; i < numTestSuites; i++) {
+                var testSuite = testSuites[i];
+                for (test in testSuite) {
+                    if (testSuite.hasOwnProperty(test)) {
+                        testName = test;
+                        try {
+                            if (typeof (testSuite[testName]) === 'function' && testName.indexOf('_test') === 0) {
+                                isTestFailed = false;
+                                testsRun += 1;
+                                testSuite[testName]();
+                                if (isTestFailed) {
+                                    testsFailed += 1;
+                                }
                             }
+                        } catch (e) {
+                            testsFailed += 1;
+                            reportError('TEST FAILED\nTest Name: ' + testName + '\nError: ' + e);
                         }
-                    } catch (e) {
-                        testsFailed += 1;
-                        reportError('TEST FAILED\nTest Name: ' + testName + '\nError: ' + e);
                     }
                 }
             }

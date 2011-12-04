@@ -321,7 +321,33 @@ var runTests = function () {
 				globalAsyncImpunit = null;
 			}); 
 			setTimeout(impcb, 200);
-		}                                   
+		},
+
+        _testMultipleTestSuites : function () {
+            var testImpUnit = getImpUnitTestInstance();
+            var testVar = '';
+            var testSuite1 = {
+                _test1 : function () {
+                    testVar += 'a';
+                }
+            };
+            var testSuite2 = {
+                _test1 : function () {
+                    testVar += 'b';
+                },
+                _test2 : function () {
+                    testVar += 'c';
+                }
+            };
+
+            var suites = [
+                testSuite1,
+                testSuite2
+            ];
+
+            testImpUnit.runTests(suites);
+            impunit.assertEqual(testVar, 'abc', 'Not all testsuites were run');
+        }
     };
 
     // run the tests
