@@ -12,6 +12,8 @@
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
+
+ Check https://github.com/homecoded/impunit for documentation
  */
 
 var impunit = (function () {
@@ -19,8 +21,9 @@ var impunit = (function () {
     function createInstance() {
         var impunit = {}, messages = '', asyncMessages = '', isTestFailed,
                 testsRun = -1, testsFailed = -1, asyncTestsFailed = [],
-                silent = true, testName,
-                asyncTestsRun = [], asyncCb = null;
+                silent = true, testName, currentTestContext, asyncTestTeardown = {}, isAsyncTest,
+                asyncTestsRun = [], asyncCb = null, asyncTestsInProgress = {},
+                uniqueId = 0;
 
         // private function to report an error
         function reportError(msg, asyncTestName) {
@@ -52,24 +55,32 @@ var impunit = (function () {
             }
 
             var test;
-            testsRun = 0;
-            testsFailed = 0;
-            asyncTestsFailed = [];
-            asyncTestsRun = 0;
-            asyncTestsRun = [];
-            messages = '';
+            testsRun = 0; testsFailed = 0; asyncTestsFailed = []; asyncTestsRun = 0;
+            asyncTestsRun = []; asyncTestTeardown = {}; messages = '';
 
             var numTestSuites = testSuites.length;
             for (i = 0; i < numTestSuites; i++) {
                 var testSuite = testSuites[i];
+                var setupMethod = (testSuite['_setup']) ? testSuite['_setup'] : function () {};
+                var teardownMethod = (testSuite['_teardown']) ? testSuite['_teardown'] : function () {};
+
                 for (test in testSuite) {
                     if (testSuite.hasOwnProperty(test)) {
                         testName = test;
                         try {
                             if (typeof (testSuite[testName]) === 'function' && testName.indexOf('_test') === 0) {
+                                uniqueId++;
                                 isTestFailed = false;
                                 testsRun += 1;
-                                testSuite[testName]();
+                                currentTestContext = testSuite;
+                                isAsyncTest = false;
+                                setupMethod.call(currentTestContext);
+                                testSuite[testName].call(currentTestContext);
+                                if (isAsyncTest) {
+                                    asyncTestTeardown[testName+uniqueId] = teardownMethod;
+                                } else {
+                                    teardownMethod.call(currentTestContext);
+                                }
                                 if (isTestFailed) {
                                     testsFailed += 1;
                                 }
@@ -77,6 +88,9 @@ var impunit = (function () {
                         } catch (e) {
                             testsFailed += 1;
                             reportError('TEST FAILED\nTest Name: ' + testName + '\nError: ' + e);
+                            if (teardownMethod) {
+                                teardownMethod.call(currentTestContext);
+                            }
                         }
                     }
                 }
@@ -126,8 +140,28 @@ var impunit = (function () {
         };
 
         impunit.asyncCallback = function (callback) {
+            isAsyncTest = true;
+            var context = currentTestContext;
             callback.testName = testName;
-            return callback;
+            callback.id = uniqueId;
+
+            var callbackWrapper = function () {
+                var testName = callback.testName;
+                if (asyncTestsInProgress[testName + callback.id]) {
+                    var index = asyncTestsInProgress[testName + callback.id].indexOf(callback);
+                    asyncTestsInProgress[testName + callback.id].splice(index, 1)
+                }
+                callback();
+                if (!asyncTestsInProgress[testName + callback.id]
+                        || asyncTestsInProgress[testName + callback.id].length == 0) {
+                    asyncTestTeardown[testName+callback.id].call(context);
+                }
+            }
+            if (!asyncTestsInProgress[testName+callback.id]) {
+                asyncTestsInProgress[testName+callback.id] = [];
+            }
+            asyncTestsInProgress[testName+callback.id].push(callback);
+            return callbackWrapper;
         };
 
         return impunit;

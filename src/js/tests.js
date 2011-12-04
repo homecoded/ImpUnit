@@ -296,7 +296,7 @@ var runTests = function () {
             impunit.assertTrue(msgLen1 < msgLen2);
         },
 
-        _testAsync : function () {
+        _testAsyncWorks : function () {
 			var asynchCallback = impunit.asyncCallback(function () {
 				impunit.assertTrue(true, 'The async test was false');
 			});
@@ -306,7 +306,7 @@ var runTests = function () {
         _testAsyncFail : function () {
 			var globalAsyncImpunit = getImpUnitTestInstance();
 			var testSuite = {
-				_test : function () {
+				_testAsyncFailGlobal : function () {
 					var cb = globalAsyncImpunit.asyncCallback(function () {
 						globalAsyncImpunit.assertTrue(false);
                         globalAsyncImpunit.assertTrue(false);
@@ -319,7 +319,7 @@ var runTests = function () {
 				impunit.assertEqual(1, globalAsyncImpunit.asyncTestsFailed());
 				impunit.assertTrue(globalAsyncImpunit.asyncMessages().length > 0);
 				globalAsyncImpunit = null;
-			}); 
+			});
 			setTimeout(impcb, 200);
 		},
 
@@ -347,7 +347,144 @@ var runTests = function () {
 
             testImpUnit.runTests(suites);
             impunit.assertEqual(testVar, 'abc', 'Not all testsuites were run');
+        },
+
+        _testSetupExecutedBefore : function () {
+            var testImpUnit = getImpUnitTestInstance();
+            var isSetupRun = false;
+            var testSuite = {
+                _setup: function () {
+                    isSetupRun = true;
+                },
+                _testSetupBefore : function () {
+                    impunit.assertTrue(isSetupRun, '_setup was not executed');
+                }
+            }
+            testImpUnit.runTests(testSuite);
+            impunit.assertEqual(testImpUnit.testsFailed(), 0, testImpUnit.messages());
+        },
+
+        _testTeardownExecutedAfter : function () {
+            var testImpUnit = getImpUnitTestInstance();
+            var isTeardownRun = false;
+            var testSuite = {
+                _teardown: function () {
+                    isTeardownRun = true;
+                },
+                _testTeardownAfter : function () {
+                    testImpUnit.assertTrue(!isTeardownRun, '_teardown was executed too early');
+                }
+            };
+            testImpUnit.runTests(testSuite);
+            impunit.assertEqual(testImpUnit.testsFailed(), 0, testImpUnit.messages());
+            impunit.assertTrue(isTeardownRun, '_teardown was not executed');
+        },
+
+        _testTeardownExecutedAfterError : function () {
+            var testImpUnit = getImpUnitTestInstance();
+            var isTeardownRun = false;
+            var testSuite = {
+                _teardown: function () {
+                    isTeardownRun = true;
+                },
+                _testTeardownAfter : function () {
+                    notImplemented();
+                }
+            };
+            testImpUnit.runTests(testSuite);
+            impunit.assertTrue(testImpUnit.testsFailed() > 0, 'test instance has no errors');
+            impunit.assertTrue(isTeardownRun, '_teardown was not executed');
+        },
+
+        _testSetupTeardownContext : function () {
+            var testImpUnit = getImpUnitTestInstance();
+            var beforeValue = '', afterValue = '';
+            var testSuite = {
+                _setup: function () {
+                    this.value = 'initialized';
+                },
+                _teardown: function () {
+                    beforeValue = this.value;
+                    this.value = 'deleted';
+                    afterValue = this.value;
+                },
+                _testTeardownAfter : function () {
+                    impunit.assertEqual(this.value, 'initialized', 'setup namespace is broken')
+                }
+            };
+            testImpUnit.runTests(testSuite);
+            impunit.assertTrue(testImpUnit.testsFailed() == 0, testImpUnit.messages());
+            impunit.assertEqual(beforeValue, 'initialized');
+            impunit.assertEqual(afterValue, 'deleted');
+        },
+
+        _testSetupTeardownAsync : function () {
+            var testImpUnit = getImpUnitTestInstance();
+            var endValue = '';
+            var testSuite = {
+                _setup : function () {
+                    this.track = 'start';
+                },
+
+                _teardown : function () {
+                    this.track += '_end';
+                    endValue = this.track;
+                },
+
+                _testAsyncTest : function () {
+                    var context = this;
+                    var asynchCallback = testImpUnit.asyncCallback(function () {
+                        context.track += '_run';
+                    });
+                    setTimeout(asynchCallback, 100);
+                }
+            }
+            testImpUnit.runTests(testSuite);
+            impunit.assertEqual(testImpUnit.testsFailed(), 0, testImpUnit.messages());
+            var asynchCallback = impunit.asyncCallback(function () {
+                impunit.assertEqual(endValue, 'start_run_end', 'The setup, run, teardown does not work for async tests.');
+            });
+            setTimeout(asynchCallback, 200);
+        },
+
+        _testDuplicateNamesTeardown : function () {
+            var teardown1Called = false;
+            var teardown2Called = false;
+
+            var testImpUnit = getImpUnitTestInstance();
+
+            var testSuite1 = {
+                _teardown : function () {
+                    teardown1Called = true;
+                },
+                _testDoNothing : function () {
+                    var asynchCallback = testImpUnit.asyncCallback(function () {
+                        testImpUnit.assertTrue(true);
+                    });
+                    setTimeout(asynchCallback, 55);
+                }
+            };
+            var testSuite2 = {
+                _teardown : function () {
+                    teardown2Called = true;
+                },
+                _testDoNothing : function () {
+                    var asynchCallback = testImpUnit.asyncCallback(function () {
+                        testImpUnit.assertTrue(true);
+                    });
+                    setTimeout(asynchCallback, 50);
+                }
+            }
+            testImpUnit.runTests([testSuite1, testSuite2]);
+            impunit.assertEqual(testImpUnit.testsFailed(), 0, testImpUnit.messages());
+
+            var asyncCallback = impunit.asyncCallback(function () {
+                impunit.assertTrue(teardown1Called, 'first teardown was not executed');
+                impunit.assertTrue(teardown2Called, 'second teardown was not executed');
+            });
+            setTimeout(asyncCallback, 100);
         }
+
     };
 
     // run the tests

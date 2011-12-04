@@ -13,13 +13,15 @@ A very light-weight unit-testing framework written in Javascript.
 
 future improvements:
 
-* passing and executing an arbitrary number of test suites with one "runTests" call
 * support for assertError (check if a certain condition leads to an error as expected)
+* add a possibility to add a test to the test chain from within the test, so you don't need to maintain a list manually
 
 incorporated improvements:
+
 * improve code to use only single quotes
 * provide number of asynchronous tests
-
+* passing and executing an arbitrary number of test suites with one "runTests" call
+* added _setup and _teardown functionality
 
 Defining Tests
 --------------
@@ -49,6 +51,34 @@ token ImpUnit uses to identify them:
 
 Note: Test suites do not litter the global namespace and give you the possibility 
 to group tests together.
+
+Setup and Teardown
+------------------
+
+You can define setup and tear-down methods in your tests that will be run before (setup) and after (teardown) each test.
+If you need the same variables or objects in every test you can use these methods to create them for. No need to copy
+the same initialization and cleanup code into every test.
+
+
+	 var testSuite = {
+
+	    _setup : function () {
+	        // put all initilization code here
+	        this.variable = 'init';
+	    }
+
+	    _teardown : function () {
+	        // put alle the code for cleanup here
+	        this.variable = null;
+	    }
+
+ 		_testFunction : function () {
+ 			this.init += 'run';
+ 			assertEqual( this.init, 'initrun' "My variable is initialized");
+ 		},
+
+ 	};
+
 
 Asynchronous Tests
 ------------------
@@ -85,6 +115,12 @@ Tests fail if ...
 
 * an assert condition fails	
 * any error is thrown within the function
+
+You can bundle a list of test in an array and pass it to the impunit.runTests-method:
+
+    var tests = [testSuite1, testSuite2];
+	impunit.runTests(tests);
+
 
 Interpreting The Results
 ------------------------
