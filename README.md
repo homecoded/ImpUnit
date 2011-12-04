@@ -3,7 +3,7 @@ ImpUnit
 
 A very light-weight unit-testing framework written in Javascript.
 
-* very small (under 70 lines of code, compressed size around 1kB) and very easy
+* very small (under 150 lines of code, compressed size around 1kB) and very easy to use
 * supports multiple test suites
 * provides assertTrue and assertEquals methods
 * a test-suite object is scanned for test-methods and executed
