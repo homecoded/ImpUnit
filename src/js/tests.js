@@ -483,6 +483,25 @@ var runTests = function () {
                 impunit.assertTrue(teardown2Called, 'second teardown was not executed');
             });
             setTimeout(asyncCallback, 100);
+        },
+        _testAsynchCallbackParameters: function () {
+            var testImpUnit = getImpUnitTestInstance();
+            // do not define teardown method in this test
+            var testSuite = {
+                _testTryCallback : function () {
+                    var asynchCallback = testImpUnit.asyncCallback(function () {
+                        testImpUnit.assertTrue(true);
+                    });
+                    setTimeout(asynchCallback, 50);
+                }
+            };
+            // call the callback with parameters
+            var asyncCallback = impunit.asyncCallback(function (value1, value2) {
+                impunit.assertEqual(value1, '1234');
+                impunit.assertEqual(value2, '5432');
+            });
+
+            asyncCallback('1234', '5432');
         }
 
     };

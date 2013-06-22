@@ -20,10 +20,10 @@ var impunit = (function () {
 
     function createInstance() {
         var impunit = {}, messages = '', asyncMessages = '', isTestFailed,
-                testsRun = -1, testsFailed = -1, asyncTestsFailed = [],
-                silent = true, testName, currentTestContext, asyncTestTeardown = {}, isAsyncTest,
-                asyncTestsRun = [], asyncCb = null, asyncTestsInProgress = {},
-                uniqueId = 0;
+            testsRun = -1, testsFailed = -1, asyncTestsFailed = [],
+            silent = true, testName, currentTestContext, asyncTestTeardown = {}, isAsyncTest,
+            asyncTestsRun = [], asyncCb = null, asyncTestsInProgress = {},
+            uniqueId = 0;
 
         // private function to report an error
         function reportError(msg, asyncTestName) {
@@ -100,7 +100,7 @@ var impunit = (function () {
         function assert(expr, testIdent, msg, asyncTestName) {
             if (expr === false) {
                 reportError('TEST FAILED\nTest Name: ' + testName + '\n' + testIdent + ': ' + msg,
-                        asyncTestName);
+                    asyncTestName);
             }
             if (asyncTestName && asyncCb) {
                 if (asyncTestsRun.indexOf(asyncTestName) < 0 ) {
@@ -151,10 +151,12 @@ var impunit = (function () {
                     var index = asyncTestsInProgress[testName + callback.id].indexOf(callback);
                     asyncTestsInProgress[testName + callback.id].splice(index, 1)
                 }
-                callback();
+                callback.apply(context, arguments);
                 if (!asyncTestsInProgress[testName + callback.id]
-                        || asyncTestsInProgress[testName + callback.id].length == 0) {
-                    asyncTestTeardown[testName+callback.id].call(context);
+                    || asyncTestsInProgress[testName + callback.id].length == 0) {
+                    if (asyncTestTeardown[testName+callback.id]) {
+                        asyncTestTeardown[testName+callback.id].call(context);
+                    }
                 }
             }
             if (!asyncTestsInProgress[testName+callback.id]) {
