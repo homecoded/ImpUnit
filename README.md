@@ -68,7 +68,7 @@ the same initialization and cleanup code into every test.
 	    }
 
 	    _teardown : function () {
-	        // put alle the code for cleanup here
+	        // put all the code for cleanup here
 	        this.variable = null;
 	    }
 
