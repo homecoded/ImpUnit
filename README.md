@@ -73,8 +73,8 @@ the same initialization and cleanup code into every test.
 	    }
 
  		_testFunction : function () {
- 			this.init += 'run';
- 			assertEqual( this.init, 'initrun' "My variable is initialized");
+ 			this.variable += 'run';
+ 			assertEqual( this.variable, 'initrun' "My variable is initialized");
  		},
 
  	};
