@@ -3,11 +3,9 @@
 
    Licensed under the MIT License
 */
-/*global impunit */
+/*global impunit,notImplemented */
 
-var globalAsyncImpunit;
-
-var runTests = function () {
+impunit.__runTests = function () {
 
     function getImpUnitTestInstance() {
         var iuClone = impunit.createInstance();
@@ -16,10 +14,10 @@ var runTests = function () {
     }
 
     function reportResult() {
-        var result = '<h1>Testing done!</h1>'
-                + '<p>Tests run: ' + impunit.testsRun() + '<br>'
-                + 'Tests failed: ' + impunit.testsFailed() + '</p>'
-                + '<p><pre>' + impunit.messages() + '</pre></p>';
+        var result = '<h1>Testing done!</h1>' +
+                '<p>Tests run: ' + impunit.testsRun() + '<br>' +
+                'Tests failed: ' + impunit.testsFailed() + '</p>' +
+                '<p><pre>' + impunit.messages() + '</pre></p>';
 
         var results = document.getElementById('results');
         results.innerHTML = result;
@@ -28,9 +26,9 @@ var runTests = function () {
     
 	function onAsyncCallbackFinished() {
 		var results = document.getElementById('asyncResults');	
-		var result = 'Asynchronous Tests run: ' + impunit.asyncTestsRun() + '<br>'
-                + 'Asynchronous Tests failed: ' + impunit.asyncTestsFailed() + '</p>'
-				+ '<pre>' + impunit.asyncMessages() + '</pre>';
+		var result = 'Asynchronous Tests run: ' + impunit.asyncTestsRun() + '<br>' +
+                 'Asynchronous Tests failed: ' + impunit.asyncTestsFailed() + '</p>' +
+				 '<pre>' + impunit.asyncMessages() + '</pre>';
 		
 		results.style.color = (impunit.asyncTestsFailed() > 0) ? '#880000' : '#008800';
 		results.innerHTML = result;	
@@ -349,7 +347,7 @@ var runTests = function () {
                 _testSetupBefore : function () {
                     impunit.assertTrue(isSetupRun, '_setup was not executed');
                 }
-            }
+            };
             testImpUnit.runTests(testSuite);
             impunit.assertEqual(testImpUnit.testsFailed(), 0, testImpUnit.messages());
         },
@@ -399,11 +397,11 @@ var runTests = function () {
                     afterValue = this.value;
                 },
                 _testTeardownAfter : function () {
-                    impunit.assertEqual(this.value, 'initialized', 'setup namespace is broken')
+                    impunit.assertEqual(this.value, 'initialized', 'setup namespace is broken');
                 }
             };
             testImpUnit.runTests(testSuite);
-            impunit.assertTrue(testImpUnit.testsFailed() == 0, testImpUnit.messages());
+            impunit.assertTrue(testImpUnit.testsFailed() === 0, testImpUnit.messages());
             impunit.assertEqual(beforeValue, 'initialized');
             impunit.assertEqual(afterValue, 'deleted');
         },
@@ -428,7 +426,7 @@ var runTests = function () {
                     });
                     setTimeout(asynchCallback, 100);
                 }
-            }
+            };
             testImpUnit.runTests(testSuite);
             impunit.assertEqual(testImpUnit.testsFailed(), 0, testImpUnit.messages());
             var asynchCallback = impunit.asyncCallback(function () {
@@ -464,7 +462,7 @@ var runTests = function () {
                     });
                     setTimeout(asynchCallback, 50);
                 }
-            }
+            };
             testImpUnit.runTests([testSuite1, testSuite2]);
             impunit.assertEqual(testImpUnit.testsFailed(), 0, testImpUnit.messages());
 

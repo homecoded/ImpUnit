@@ -1,0 +1,24 @@
+{
+  "name": "ImpUnit",
+  "version": "0.0.1",
+  "description": "A very lightweight unit-testing framework for JavaScript",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/homecoded/UmpUnit.git"
+  },
+  "keywords": [
+    "unit-testing",
+    "JavaScript"
+  ],
+  "author": "Manuel Ruelke, @homecoded",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/homecoded/ImpUnit/issues"
+  },
+  "homepage": "https://github.com/homecoded/ImpUnit",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-uglify": "^0.5.1"
+  }
+}
