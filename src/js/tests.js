@@ -473,7 +473,6 @@ impunit.__runTests = function () {
             setTimeout(asyncCallback, 100);
         },
         _testAsynchCallbackParameters: function () {
-            var testImpUnit = getImpUnitTestInstance();
             // call the callback with parameters
             var asyncCallback = impunit.asyncCallback(function (value1, value2) {
                 impunit.assertEqual(value1, '1234');
