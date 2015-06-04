@@ -1,23 +1,11 @@
 /*
-   Copyright 2011 Manuel Rülke, http://homecoded.com
+   Copyright 2015 Manuel Ruelke, http://homecoded.com
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   Licensed under the MIT License
 */
-/*global impunit */
+/*global impunit,notImplemented */
 
-var globalAsyncImpunit;
-
-var runTests = function () {
+impunit.__runTests = function () {
 
     function getImpUnitTestInstance() {
         var iuClone = impunit.createInstance();
@@ -26,10 +14,10 @@ var runTests = function () {
     }
 
     function reportResult() {
-        var result = '<h1>Testing done!</h1>'
-                + '<p>Tests run: ' + impunit.testsRun() + '<br>'
-                + 'Tests failed: ' + impunit.testsFailed() + '</p>'
-                + '<p><pre>' + impunit.messages() + '</pre></p>';
+        var result = '<h1>Testing done!</h1>' +
+                '<p>Tests run: ' + impunit.testsRun() + '<br>' +
+                'Tests failed: ' + impunit.testsFailed() + '</p>' +
+                '<p><pre>' + impunit.messages() + '</pre></p>';
 
         var results = document.getElementById('results');
         results.innerHTML = result;
@@ -38,9 +26,9 @@ var runTests = function () {
     
 	function onAsyncCallbackFinished() {
 		var results = document.getElementById('asyncResults');	
-		var result = 'Asynchronous Tests run: ' + impunit.asyncTestsRun() + '<br>'
-                + 'Asynchronous Tests failed: ' + impunit.asyncTestsFailed() + '</p>'
-				+ '<pre>' + impunit.asyncMessages() + '</pre>';
+		var result = 'Asynchronous Tests run: ' + impunit.asyncTestsRun() + '<br>' +
+                 'Asynchronous Tests failed: ' + impunit.asyncTestsFailed() + '</p>' +
+				 '<pre>' + impunit.asyncMessages() + '</pre>';
 		
 		results.style.color = (impunit.asyncTestsFailed() > 0) ? '#880000' : '#008800';
 		results.innerHTML = result;	
@@ -359,7 +347,7 @@ var runTests = function () {
                 _testSetupBefore : function () {
                     impunit.assertTrue(isSetupRun, '_setup was not executed');
                 }
-            }
+            };
             testImpUnit.runTests(testSuite);
             impunit.assertEqual(testImpUnit.testsFailed(), 0, testImpUnit.messages());
         },
@@ -409,11 +397,11 @@ var runTests = function () {
                     afterValue = this.value;
                 },
                 _testTeardownAfter : function () {
-                    impunit.assertEqual(this.value, 'initialized', 'setup namespace is broken')
+                    impunit.assertEqual(this.value, 'initialized', 'setup namespace is broken');
                 }
             };
             testImpUnit.runTests(testSuite);
-            impunit.assertTrue(testImpUnit.testsFailed() == 0, testImpUnit.messages());
+            impunit.assertTrue(testImpUnit.testsFailed() === 0, testImpUnit.messages());
             impunit.assertEqual(beforeValue, 'initialized');
             impunit.assertEqual(afterValue, 'deleted');
         },
@@ -438,7 +426,7 @@ var runTests = function () {
                     });
                     setTimeout(asynchCallback, 100);
                 }
-            }
+            };
             testImpUnit.runTests(testSuite);
             impunit.assertEqual(testImpUnit.testsFailed(), 0, testImpUnit.messages());
             var asynchCallback = impunit.asyncCallback(function () {
@@ -474,7 +462,7 @@ var runTests = function () {
                     });
                     setTimeout(asynchCallback, 50);
                 }
-            }
+            };
             testImpUnit.runTests([testSuite1, testSuite2]);
             impunit.assertEqual(testImpUnit.testsFailed(), 0, testImpUnit.messages());
 

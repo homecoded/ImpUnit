@@ -208,8 +208,8 @@ instance of ImpUnit test another.
 Bottomline
 ----------
 
-ImpUnit has been released under Apache2 license. With this you are free to
+ImpUnit has been released under MIT license. With this you are free to
 use it, distribute it and change it.
 
-author: Manuel Ruelke, 01/2011
+author: Manuel Ruelke, 01/2015
 contact: http://homecoded.com
