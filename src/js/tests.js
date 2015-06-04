@@ -32,9 +32,37 @@ impunit.__runTests = function () {
 		
 		results.style.color = (impunit.asyncTestsFailed() > 0) ? '#880000' : '#008800';
 		results.innerHTML = result;	
-	}    
+	}
+
+    function createSuiteWithError (testImpUnit) {
+        var testSuiteError = {
+            _test1: function () {
+                testImpUnit.assertTrue(false);
+            }
+        };
+        return testSuiteError;
+    }
 
     //  test suite
+    function createTestSuiteAllGreen(testImpUnit) {
+        var testSuiteOk = {
+            _test1: function () {
+                testImpUnit.assertTrue(true);
+            }
+        };
+        return testSuiteOk;
+    }
+
+    function createSuiteAllGreen2Asserts(testImpUnit) {
+        var testSuiteOk2 = {
+            _test1: function () {
+                testImpUnit.assertTrue(true);
+                testImpUnit.assertTrue(true);
+            }
+        };
+        return testSuiteOk2;
+    }
+
     var testSuite = {
 
         _testInit : function _testInit() {
@@ -182,25 +210,11 @@ impunit.__runTests = function () {
             impunit.assertEqual(1, testImpUnit.testsRun());
             impunit.assertEqual(1, testImpUnit.testsFailed());
         },
-
         _testRunTestMultipleSuites : function () {
             var testImpUnit = getImpUnitTestInstance();
-            var testSuiteError = {
-                _test1 : function () {
-                    testImpUnit.assertTrue(false);
-                }
-            };
-            var testSuiteOk = {
-                _test1 : function () {
-                    testImpUnit.assertTrue(true);
-                }
-            };
-            var testSuiteOk2 = {
-                _test1 : function () {
-                    testImpUnit.assertTrue(true);
-                    testImpUnit.assertTrue(true);
-                }
-            };
+            var testSuiteError = createSuiteWithError(testImpUnit);
+            var testSuiteOk = createTestSuiteAllGreen(testImpUnit);
+            var testSuiteOk2 = createSuiteAllGreen2Asserts(testImpUnit);
 
             testImpUnit.runTests(testSuiteOk);
             impunit.assertEqual(1, testImpUnit.testsRun());
