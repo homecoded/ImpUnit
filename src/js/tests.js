@@ -3,7 +3,7 @@
 
    Licensed under the MIT License
 */
-/*global impunit,notImplemented */
+/*global impunit,notImplemented,alert */
 
 impunit.__runTests = function () {
 
@@ -474,22 +474,16 @@ impunit.__runTests = function () {
         },
         _testAsynchCallbackParameters: function () {
             var testImpUnit = getImpUnitTestInstance();
-            // do not define teardown method in this test
-            var testSuite = {
-                _testTryCallback : function () {
-                    var asynchCallback = testImpUnit.asyncCallback(function () {
-                        testImpUnit.assertTrue(true);
-                    });
-                    setTimeout(asynchCallback, 50);
-                }
-            };
             // call the callback with parameters
             var asyncCallback = impunit.asyncCallback(function (value1, value2) {
                 impunit.assertEqual(value1, '1234');
                 impunit.assertEqual(value2, '5432');
             });
 
-            asyncCallback('1234', '5432');
+            setTimeout(function () {
+                asyncCallback('1234', '5432');
+            }, 100);
+
         }
 
     };
