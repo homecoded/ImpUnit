@@ -1,5 +1,5 @@
 /*
- Copyright 2011 Manuel Rülke, http://homecoded.com
+ Copyright 2011-2015 Manuel Ruelke, http://homecoded.com
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 
- Check https://github.com/homecoded/impunit for documentation
+ Check https://github.com/homecoded/ImpUnit for documentation
  */
 
 var impunit = (function () {
@@ -44,6 +44,46 @@ var impunit = (function () {
             }
         }
 
+        function runSingleTest(testSuite, setupMethod, tearDownMethod) {
+            uniqueId++;
+            isTestFailed = false;
+            testsRun += 1;
+            currentTestContext = testSuite;
+            isAsyncTest = false;
+            setupMethod.call(currentTestContext);
+            testSuite[testName].call(currentTestContext);
+            if (isAsyncTest) {
+                asyncTestTeardown[testName + uniqueId] = tearDownMethod;
+            } else {
+                tearDownMethod.call(currentTestContext);
+            }
+            if (isTestFailed) {
+                testsFailed += 1;
+            }
+        }
+
+        function runSuiteTest(testSuite, test) {
+            var setupMethod = (testSuite._setup) ? testSuite._setup : function () {
+            };
+            var tearDownMethod = (testSuite._teardown) ? testSuite._teardown : function () {
+            };
+
+            if (testSuite.hasOwnProperty(test)) {
+                testName = test;
+                try {
+                    if (typeof (testSuite[testName]) === 'function' && testName.indexOf('_test') === 0) {
+                        runSingleTest(testSuite, setupMethod, tearDownMethod);
+                    }
+                } catch (e) {
+                    testsFailed += 1;
+                    reportError('TEST FAILED\nTest Name: ' + testName + '\nError: ' + e);
+                    if (tearDownMethod) {
+                        tearDownMethod.call(currentTestContext);
+                    }
+                }
+            }
+        }
+
         // run the tests in a test container
         impunit.runTests = function (testSuites) {
             if (!testSuites) {
@@ -55,44 +95,19 @@ var impunit = (function () {
             }
 
             var test;
-            testsRun = 0; testsFailed = 0; asyncTestsFailed = []; asyncTestsRun = 0;
-            asyncTestsRun = []; asyncTestTeardown = {}; messages = '';
+            testsRun = 0;
+            testsFailed = 0;
+            asyncTestsFailed = [];
+            asyncTestsRun = [];
+            asyncTestTeardown = {};
+            messages = '';
 
             var numTestSuites = testSuites.length;
-            for (i = 0; i < numTestSuites; i++) {
+            for (var i = 0; i < numTestSuites; i++) {
                 var testSuite = testSuites[i];
-                var setupMethod = (testSuite['_setup']) ? testSuite['_setup'] : function () {};
-                var teardownMethod = (testSuite['_teardown']) ? testSuite['_teardown'] : function () {};
 
                 for (test in testSuite) {
-                    if (testSuite.hasOwnProperty(test)) {
-                        testName = test;
-                        try {
-                            if (typeof (testSuite[testName]) === 'function' && testName.indexOf('_test') === 0) {
-                                uniqueId++;
-                                isTestFailed = false;
-                                testsRun += 1;
-                                currentTestContext = testSuite;
-                                isAsyncTest = false;
-                                setupMethod.call(currentTestContext);
-                                testSuite[testName].call(currentTestContext);
-                                if (isAsyncTest) {
-                                    asyncTestTeardown[testName+uniqueId] = teardownMethod;
-                                } else {
-                                    teardownMethod.call(currentTestContext);
-                                }
-                                if (isTestFailed) {
-                                    testsFailed += 1;
-                                }
-                            }
-                        } catch (e) {
-                            testsFailed += 1;
-                            reportError('TEST FAILED\nTest Name: ' + testName + '\nError: ' + e);
-                            if (teardownMethod) {
-                                teardownMethod.call(currentTestContext);
-                            }
-                        }
-                    }
+                    runSuiteTest(testSuite, test);
                 }
             }
         };
@@ -103,7 +118,7 @@ var impunit = (function () {
                     asyncTestName);
             }
             if (asyncTestName && asyncCb) {
-                if (asyncTestsRun.indexOf(asyncTestName) < 0 ) {
+                if (asyncTestsRun.indexOf(asyncTestName) < 0) {
                     asyncTestsRun.push(asyncTestName);
                 }
                 asyncCb();
@@ -118,12 +133,24 @@ var impunit = (function () {
             assert(exp1 === exp2, 'assertEqual (' + exp1 + ') != (' + exp2 + ')', msg, impunit.assertEqual.caller.testName);
         };
 
-        impunit.messages = function () { return messages; };
-        impunit.asyncMessages = function () { return asyncMessages; };
-        impunit.testsFailed = function () { return testsFailed; };
-        impunit.asyncTestsFailed = function () { return asyncTestsFailed.length; };
-        impunit.testsRun = function () { return testsRun; };
-        impunit.asyncTestsRun = function () { return asyncTestsRun.length; };
+        impunit.messages = function () {
+            return messages;
+        };
+        impunit.asyncMessages = function () {
+            return asyncMessages;
+        };
+        impunit.testsFailed = function () {
+            return testsFailed;
+        };
+        impunit.asyncTestsFailed = function () {
+            return asyncTestsFailed.length;
+        };
+        impunit.testsRun = function () {
+            return testsRun;
+        };
+        impunit.asyncTestsRun = function () {
+            return asyncTestsRun.length;
+        };
 
         impunit.silent = function (value) {
             if (arguments.length > 0) {
@@ -149,20 +176,21 @@ var impunit = (function () {
                 var testName = callback.testName;
                 if (asyncTestsInProgress[testName + callback.id]) {
                     var index = asyncTestsInProgress[testName + callback.id].indexOf(callback);
-                    asyncTestsInProgress[testName + callback.id].splice(index, 1)
+                    asyncTestsInProgress[testName + callback.id].splice(index, 1);
                 }
                 callback.apply(context, arguments);
-                if (!asyncTestsInProgress[testName + callback.id]
-                    || asyncTestsInProgress[testName + callback.id].length == 0) {
-                    if (asyncTestTeardown[testName+callback.id]) {
-                        asyncTestTeardown[testName+callback.id].call(context);
+                if (!asyncTestsInProgress[testName + callback.id] ||
+                    asyncTestsInProgress[testName + callback.id].length === 0)
+                {
+                    if (asyncTestTeardown[testName + callback.id]) {
+                        asyncTestTeardown[testName + callback.id].call(context);
                     }
                 }
+            };
+            if (!asyncTestsInProgress[testName + callback.id]) {
+                asyncTestsInProgress[testName + callback.id] = [];
             }
-            if (!asyncTestsInProgress[testName+callback.id]) {
-                asyncTestsInProgress[testName+callback.id] = [];
-            }
-            asyncTestsInProgress[testName+callback.id].push(callback);
+            asyncTestsInProgress[testName + callback.id].push(callback);
             return callbackWrapper;
         };
 
